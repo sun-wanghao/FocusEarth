@@ -1,0 +1,49 @@
+# Supply the null paths below. Paths are relative to the working directory.
+dataset:
+  name: MME-RealWorld-RS
+  root: null
+  annotations: null
+  question_count: 3738
+
+scoring_encoders:
+  checkpoints:
+    CLIP: null
+    GeoRSCLIP: null
+    RemoteCLIP: null
+    SkyCLIP-50: null
+  device: cuda
+  image_batch_size: 128
+
+# Method and answering settings are fixed and checked by the configuration loader.
+region_prioritization:
+  candidate_grid: [6, 6]
+  expansion_per_side: 0.05
+  views: [FULL, TL_2OVER3, TR_2OVER3, BL_2OVER3, BR_2OVER3]
+  fusion: entropy_matched_equal_weight
+  temperature_range: [0.25, 4.0]
+  entropy_search_steps: 40
+  standard_deviation_floor: 1.0e-6
+
+region_selection:
+  region_count: 6
+
+visual_representation:
+  canvas_scale: 0.875
+  rho: 0.605
+
+answer_model:
+  checkpoint: null
+  repository: Qwen/Qwen3-VL-8B-Instruct
+  revision: 0c351dd01ed87e9c1b53cbc748cba10e6187ff3b
+  prompt_protocol: mme_supplement_evidence_final_answer
+  dtype: bfloat16
+  attention: sdpa
+
+generation:
+  do_sample: false
+  temperature: 0.0
+  use_cache: true
+  max_new_tokens: 64
+
+output:
+  directory: null
