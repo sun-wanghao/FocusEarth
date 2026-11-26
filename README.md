@@ -126,6 +126,4 @@ If you find our work useful, please consider citing:
 
 ## Acknowledgements
 
-We thank the teams behind [CLIP](https://github.com/openai/CLIP), [GeoRSCLIP](https://github.com/om-ai-lab/RS5M), [RemoteCLIP](https://github.com/ChenDelong1999/RemoteCLIP), [SkyCLIP](https://github.com/wangzhecheng/SkyScript), and [Qwen3-VL](https://github.com/QwenLM/Qwen3-VL), as well as the creators of [MME-RealWorld](https://github.com/MME-Benchmarks/MME-RealWorld), [LRS-VQA](https://huggingface.co/datasets/ll-13/LRS-VQA), [XLRS-Bench](https://huggingface.co/datasets/initiacms/XLRS-Bench-lite), and [LRS-GRO](https://huggingface.co/datasets/HappyBug/LRS-GRO) for their contributions. We also acknowledge [OpenCLIP](https://github.com/mlfoundations/open_clip), [Transformers](https://github.com/huggingface/transformers), and [spaCy](https://github.com/explosion/spaCy).
-
-External models and datasets are subject to their respective licenses and terms.
+We thank the authors of [ZoomSearch](https://github.com/kiki-zyq/ZoomSearch) and [WeaveEarth](https://github.com/XianZhi-Ma/WeaveEarth) for their inspiring work and for making their code publicly available.
