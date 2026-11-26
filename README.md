@@ -24,7 +24,7 @@
 **FocusEarth** is a training-free framework that couples **where to look** in the source image with **what to preserve** in the encoded visual representation for ultra-high-resolution remote sensing visual question answering (UHR RS-VQA).
 
 <p align="center">
-  <img src="assets/overview.pdf" width="100%" alt="Overview of FocusEarth">
+  <img src="assets/overview.png" width="100%" alt="Overview of FocusEarth">
 </p>
 
 FocusEarth consists of three stages:
