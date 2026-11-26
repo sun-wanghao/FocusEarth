@@ -82,25 +82,17 @@ FocusEarth uses four frozen image–text encoders for region prioritization and 
 
 Download the pretrained checkpoints from the following sources:
 
-| Model | Checkpoint | Download |
+| Model | Checkpoint | Source |
 | :--- | :--- | :---: |
 | CLIP | ViT-B/32 | [OpenAI](https://github.com/openai/CLIP) |
-| GeoRSCLIP | `RS5M_ViT-B-32.pt` | [Hugging Face](https://huggingface.co/Zilun/GeoRSCLIP/blob/main/ckpt/RS5M_ViT-B-32.pt) |
-| RemoteCLIP | `RemoteCLIP-ViT-B-32.pt` | [Hugging Face](https://huggingface.co/chendelong/RemoteCLIP/blob/main/RemoteCLIP-ViT-B-32.pt) |
+| GeoRSCLIP | ViT-B/32 | [Hugging Face](https://huggingface.co/Zilun/GeoRSCLIP/blob/main/ckpt/RS5M_ViT-B-32.pt) |
+| RemoteCLIP | ViT-B/32 | [Hugging Face](https://huggingface.co/chendelong/RemoteCLIP/blob/main/RemoteCLIP-ViT-B-32.pt) |
 | SkyCLIP-50 | ViT-B/32, top 50%, epoch 20 | [Checkpoint](https://opendatasharing.s3.us-west-2.amazonaws.com/SkyScript/ckpt/SkyCLIP_ViT_B32_top50pct.zip) |
 | Qwen3-VL | Qwen3-VL-8B-Instruct | [Hugging Face](https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct/tree/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b) |
 
-Set the local checkpoint paths in [`configs/mme_realworld_rs.yaml`](configs/mme_realworld_rs.yaml):
+Set the local checkpoint paths under `scoring_encoders.checkpoints` and `answer_model.checkpoint` in [`configs/mme_realworld_rs.yaml`](configs/mme_realworld_rs.yaml).
 
-| Model | Configuration key |
-| :--- | :--- |
-| CLIP | `scoring_encoders.checkpoints.CLIP` |
-| GeoRSCLIP | `scoring_encoders.checkpoints.GeoRSCLIP` |
-| RemoteCLIP | `scoring_encoders.checkpoints.RemoteCLIP` |
-| SkyCLIP-50 | `scoring_encoders.checkpoints.SkyCLIP-50` |
-| Qwen3-VL | `answer_model.checkpoint` |
-
-For SkyCLIP-50, extract the downloaded archive and use `epoch_20.pt`. For Qwen3-VL, download the complete model snapshot, including the processor and tokenizer files.
+For SkyCLIP-50, extract the downloaded archive and select the epoch-20 checkpoint. For Qwen3-VL, download the complete model snapshot, including the processor and tokenizer files.
 
 See the [reproduction guide](docs/reproduction.md) for checkpoint specifications and SHA-256 checksums.
 
