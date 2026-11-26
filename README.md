@@ -22,19 +22,34 @@ for Ultra-High-Resolution Remote Sensing VQA
 
 ## Overview
 
-**FocusEarth** is a training-free framework that couples **where to look** in the source image with **what to preserve** in the encoded visual representation for ultra-high-resolution remote sensing visual question answering (UHR RS-VQA).
+Ultra-high-resolution (UHR) remote sensing visual question answering (RS-VQA) requires interpreting fine-grained local details within their global spatial context under limited visual-token budgets.
+
+**FocusEarth** is a training-free framework that couples **where to look** in the source image with **what to preserve** in the encoded visual representation. It leverages multiple frozen image–text encoders to localize question-relevant regions and uses their spatial correspondence to guide visual token compression.
 
 <p align="center">
-  <img src="assets/overview.png" width="100%" alt="Overview of FocusEarth">
+  <img src="./overview.png" width="100%" alt="Overview of the FocusEarth framework">
 </p>
 
-FocusEarth consists of three stages:
+<p align="center">
+  <em>Overview of the FocusEarth framework.</em>
+</p>
 
-- **Query-Adaptive Region Prioritization:** Derives entity and context descriptions and fuses regional responses from multiple frozen image–text encoders through score standardization and entropy matching.
-- **Multi-Query Region Selection:** Integrates context and entity proposals under a shared region budget.
-- **Spatially Aligned Visual Representation:** Maps selected source regions onto the encoded feature grid of a resized full-scene image, preserving their corresponding features individually while spatially aggregating the remaining features.
+### Framework
 
-This repository provides the FocusEarth implementation and inference pipeline for MME-RealWorld-RS.
+- **Query-Adaptive Region Prioritization.** Derives entity and context descriptions from the question and combines regional responses from multiple frozen image–text encoders through score standardization and entropy matching.
+
+- **Multi-Query Region Selection.** Integrates context and entity proposals to select question-relevant regions under a shared region budget.
+
+- **Spatially Aligned Visual Representation.** Maps selected source regions onto the encoded feature grid of a resized full-scene image, retaining their corresponding features individually while spatially aggregating the remaining features.
+
+### Highlights
+
+- **Training-free:** All image–text encoders and answer models remain frozen throughout inference.
+- **Effective:** Achieves competitive performance across four UHR RS-VQA benchmarks.
+- **Efficient:** Reduces visual-token count by **54.0%** and answering-stage latency by **49.0%** with Qwen3-VL-8B relative to direct inference on MME-RealWorld-RS, with region scoring and selection precomputed offline.
+
+This repository provides the official implementation of FocusEarth, including inference and evaluation on MME-RealWorld-RS.
+
 
 ## Installation
 
