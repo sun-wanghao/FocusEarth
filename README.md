@@ -126,7 +126,5 @@ If you find our work useful, please consider citing:
 
 ## Acknowledgements
 
-## Acknowledgements
-
 - Thanks to the authors of [ZoomSearch](https://github.com/kiki-zyq/ZoomSearch) for their excellent work.
 - Thanks to the authors of [WeaveEarth](https://github.com/XianZhi-Ma/WeaveEarth) for their excellent work.
