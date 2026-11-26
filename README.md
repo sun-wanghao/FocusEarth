@@ -24,7 +24,7 @@ for Ultra-High-Resolution Remote Sensing VQA
 
 Ultra-high-resolution (UHR) remote sensing visual question answering (RS-VQA) requires interpreting fine-grained local details within their global spatial context under limited visual-token budgets.
 
-**FocusEarth** is a training-free framework that couples **where to look** in the source image with **what to preserve** in the encoded visual representation. It leverages multiple frozen image–text encoders to localize question-relevant regions and uses their spatial correspondence to guide visual token compression.
+**FocusEarth** is a training-free framework that couples **where to look** in the source image with **what to preserve** in the encoded visual representation. It leverages multiple frozen image–text encoders to localize question-relevant regions and establishes spatial correspondence between selected source regions and encoded visual features to guide visual token compression.
 
 <p align="center">
   <img src="assets/overview.png" width="100%" alt="Overview of FocusEarth">
@@ -44,12 +44,26 @@ Ultra-high-resolution (UHR) remote sensing visual question answering (RS-VQA) re
 
 ### Highlights
 
-- **Training-free:** All image–text encoders and answer models remain frozen throughout inference.
-- **Effective:** Achieves competitive performance across four UHR RS-VQA benchmarks.
-- **Efficient:** Reduces visual-token count by **54.0%** and answering-stage latency by **49.0%** with Qwen3-VL-8B relative to direct inference on MME-RealWorld-RS, with region scoring and selection precomputed offline.
+- **Training-free:** All pretrained image–text encoders and answer models remain frozen throughout inference.
 
-This repository provides the official implementation of FocusEarth, including inference and evaluation on MME-RealWorld-RS.
+- **Effective:** Achieves competitive performance across four UHR RS-VQA benchmarks, with accuracy gains across the evaluated frozen answer models.
 
+- **Efficient:** Reduces visual-token count by **54.0%** and answering-stage latency by **49.0%** relative to direct Qwen3-VL-8B inference on MME-RealWorld-RS, with region scoring and selection precomputed offline.
+
+This repository provides the official implementation of FocusEarth for ultra-high-resolution remote sensing visual question answering.
+
+## Benchmarks
+
+We evaluate FocusEarth on four representative UHR RS-VQA benchmarks covering diverse perception and reasoning tasks.
+
+| Benchmark | Description | Questions | Accuracy (%) |
+| :--- | :--- | ---: | ---: |
+| [MME-RealWorld-RS](https://huggingface.co/datasets/yifanzhang114/MME-RealWorld) | Color, counting, and spatial position | 3,738 | 55.91 |
+| [LRS-VQA](https://huggingface.co/datasets/ll-13/LRS-VQA) | Open-ended visual question answering | 7,333 | 34.32 |
+| [XLRS-Bench-Lite](https://huggingface.co/datasets/initiacms/XLRS-Bench-lite) | Perception and reasoning | 3,080 | 52.99 |
+| [LRS-GRO](https://huggingface.co/datasets/HappyBug/LRS-GRO) | Global-, region-, and object-level VQA | 9,734 | 62.85 |
+
+The overall accuracies are reported in our paper using Qwen3-VL-8B-Instruct as the answer model. Please refer to the respective dataset repositories for data access and preparation instructions.
 
 ## Installation
 
@@ -75,18 +89,19 @@ python -m pip install \
 
 For detailed dependency and runtime requirements, see the [reproduction guide](docs/reproduction.md).
 
-
 ## Model Preparation
 
-FocusEarth uses four frozen image–text encoders for region prioritization and Qwen3-VL-8B-Instruct as the answer model.
+FocusEarth operates with frozen pretrained models without task-specific fine-tuning. Its applicability across different answer models is demonstrated in our paper, including Qwen3-VL, Qwen2.5-VL, LLaVA-v1.6, and Intern-S1-mini.
 
-Download the pretrained checkpoints from the following sources:
+### Pretrained Checkpoints
+
+The following checkpoints are used in the Qwen3-VL-8B-Instruct configuration:
 
 | Model | Checkpoint | Source |
 | :--- | :--- | :---: |
 | CLIP | ViT-B/32 | [OpenAI](https://github.com/openai/CLIP) |
-| GeoRSCLIP | ViT-B/32 | [Hugging Face](https://huggingface.co/Zilun/GeoRSCLIP/blob/main/ckpt/RS5M_ViT-B-32.pt) |
-| RemoteCLIP | ViT-B/32 | [Hugging Face](https://huggingface.co/chendelong/RemoteCLIP/blob/main/RemoteCLIP-ViT-B-32.pt) |
+| GeoRSCLIP | `RS5M_ViT-B-32.pt` | [Hugging Face](https://huggingface.co/Zilun/GeoRSCLIP/blob/main/ckpt/RS5M_ViT-B-32.pt) |
+| RemoteCLIP | `RemoteCLIP-ViT-B-32.pt` | [Hugging Face](https://huggingface.co/chendelong/RemoteCLIP/blob/main/RemoteCLIP-ViT-B-32.pt) |
 | SkyCLIP-50 | ViT-B/32, top 50%, epoch 20 | [Checkpoint](https://opendatasharing.s3.us-west-2.amazonaws.com/SkyScript/ckpt/SkyCLIP_ViT_B32_top50pct.zip) |
 | Qwen3-VL | Qwen3-VL-8B-Instruct | [Hugging Face](https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct/tree/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b) |
 
@@ -96,11 +111,13 @@ For SkyCLIP-50, extract the downloaded archive and select the epoch-20 checkpoin
 
 See the [reproduction guide](docs/reproduction.md) for checkpoint specifications and SHA-256 checksums.
 
-## Dataset Preparation
+## Evaluation
 
-Download [MME-RealWorld](https://huggingface.co/datasets/yifanzhang114/MME-RealWorld) from the official Hugging Face repository. We use the Remote Sensing subset (MME-RealWorld-RS), which contains 3,738 multiple-choice questions covering Color, Count, and Position.
+The current release provides an evaluation entry point for MME-RealWorld-RS. The following example demonstrates the FocusEarth evaluation pipeline using Qwen3-VL-8B-Instruct.
 
-Download `MME_RealWorld.json` and all `remote_sensing.tar.gz.part_*` archives. Merge and extract the image archives following the [official instructions](https://github.com/MME-Benchmarks/MME-RealWorld).
+### Data Preparation
+
+Download `MME_RealWorld.json` and all `remote_sensing.tar.gz.part_*` archives from [MME-RealWorld](https://huggingface.co/datasets/yifanzhang114/MME-RealWorld). Merge and extract the image archives following the [official instructions](https://github.com/MME-Benchmarks/MME-RealWorld).
 
 Organize the dataset as follows, preserving the original relative image paths:
 
@@ -116,23 +133,22 @@ Update the dataset paths in [`configs/mme_realworld_rs.yaml`](configs/mme_realwo
 
 ```yaml
 dataset:
-  annotations: data/MME-RealWorld-RS/MME_RealWorld.json
-  root: data/MME-RealWorld-RS
+  annotations: /path/to/MME-RealWorld-RS/MME_RealWorld.json
+  root: /path/to/MME-RealWorld-RS
 ```
 
 The evaluation script automatically selects the Remote Sensing subset from the original annotations.
 
-## Evaluation
+### Example Usage
 
-### MME-RealWorld-RS
+After configuring the model checkpoints and dataset paths, run the following command from the repository root:
 
-After preparing the model checkpoints and dataset, configure the corresponding paths in [`configs/mme_realworld_rs.yaml`](configs/mme_realworld_rs.yaml).
+```bash
+python scripts/eval_mme_realworld_rs.py \
+  --config configs/mme_realworld_rs.yaml
+```
 
-Run the following command from the repository root:
-
-FocusEarth performs query-adaptive region prioritization, multi-query region selection, and spatially aligned visual representation construction before answer generation.
-
-The answer model generates an image-grounded evidence description followed by a final option letter:
+The answer model is prompted to provide an image-grounded evidence description followed by a final option letter:
 
 ```text
 Evidence: [A concise, image-grounded observation-based explanation]
@@ -143,7 +159,7 @@ Evaluation reports overall and per-category accuracy for Color, Count, and Posit
 
 ### Outputs
 
-The evaluation script saves the following files to the specified output directory:
+The evaluation script saves the following files to the configured output directory:
 
 | File | Description |
 | :--- | :--- |
@@ -167,10 +183,22 @@ python -m unittest discover -s tests -v
 
 ## Citation
 
+If you find FocusEarth useful in your research, please cite our work:
+
+```bibtex
+@misc{sun2026focusearth,
+  title   = {FocusEarth: Where to Look and What to Preserve for Ultra-High-Resolution Remote Sensing {VQA}},
+  author  = {Sun, Wanghao and Liu, Nanqing and Sun, Yu and Hu, Zhanxuan and Ming, Qi and Li, Heng-Chao},
+  year    = {2026}
+}
+```
+
 ## Acknowledgements
 
 We thank the teams behind [CLIP](https://github.com/openai/CLIP), [GeoRSCLIP](https://github.com/om-ai-lab/RS5M), [RemoteCLIP](https://github.com/ChenDelong1999/RemoteCLIP), [SkyCLIP](https://github.com/wangzhecheng/SkyScript), and [Qwen3-VL](https://github.com/QwenLM/Qwen3-VL) for making their pretrained models accessible.
 
-We also thank the creators of [MME-RealWorld](https://github.com/MME-Benchmarks/MME-RealWorld) and the developers of [OpenCLIP](https://github.com/mlfoundations/open_clip), [Transformers](https://github.com/huggingface/transformers), and [spaCy](https://github.com/explosion/spaCy) for their valuable contributions to the research community.
+We are grateful to the creators of [MME-RealWorld](https://github.com/MME-Benchmarks/MME-RealWorld), [LRS-VQA](https://huggingface.co/datasets/ll-13/LRS-VQA), [XLRS-Bench](https://huggingface.co/datasets/initiacms/XLRS-Bench-lite), and [LRS-GRO](https://huggingface.co/datasets/HappyBug/LRS-GRO) for providing the benchmarks used in our research.
+
+We also thank the developers of [OpenCLIP](https://github.com/mlfoundations/open_clip), [Transformers](https://github.com/huggingface/transformers), and [spaCy](https://github.com/explosion/spaCy) for their open-source contributions.
 
 External models and datasets are subject to their respective licenses and terms.
