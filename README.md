@@ -78,68 +78,107 @@ For detailed dependency and runtime requirements, see the [reproduction guide](d
 
 ## Model Preparation
 
-Obtain the following checkpoints from their respective projects and store them outside this repository:
+FocusEarth uses four frozen image–text encoders for region prioritization and Qwen3-VL-8B-Instruct as the answer model.
 
-| Component | Required checkpoint | Configuration path |
-| --- | --- | --- |
-| CLIP | ViT-B/32 | `scoring_encoders.checkpoints.CLIP` |
-| GeoRSCLIP | RS5M ViT-B/32 | `scoring_encoders.checkpoints.GeoRSCLIP` |
-| RemoteCLIP | ViT-B/32 | `scoring_encoders.checkpoints.RemoteCLIP` |
-| SkyCLIP-50 | ViT-B/32, top 50% training subset, epoch 20 | `scoring_encoders.checkpoints.SkyCLIP-50` |
-| Qwen3-VL | `Qwen/Qwen3-VL-8B-Instruct` | `answer_model.checkpoint` |
+Download the pretrained checkpoints from the following sources:
 
-Use Qwen revision `0c351dd01ed87e9c1b53cbc748cba10e6187ff3b`, including its processor and tokenizer files. Scoring checkpoint identities are checked against SHA-256 hashes listed in the [reproduction guide](docs/reproduction.md). Models load from local files; inference does not download missing weights. Load only trusted checkpoint files.
+| Model | Checkpoint | Download |
+| :--- | :--- | :---: |
+| CLIP | ViT-B/32 | [OpenAI](https://github.com/openai/CLIP) |
+| GeoRSCLIP | `RS5M_ViT-B-32.pt` | [Hugging Face](https://huggingface.co/Zilun/GeoRSCLIP/blob/main/ckpt/RS5M_ViT-B-32.pt) |
+| RemoteCLIP | `RemoteCLIP-ViT-B-32.pt` | [Hugging Face](https://huggingface.co/chendelong/RemoteCLIP/blob/main/RemoteCLIP-ViT-B-32.pt) |
+| SkyCLIP-50 | ViT-B/32, top 50%, epoch 20 | [Checkpoint](https://opendatasharing.s3.us-west-2.amazonaws.com/SkyScript/ckpt/SkyCLIP_ViT_B32_top50pct.zip) |
+| Qwen3-VL | Qwen3-VL-8B-Instruct | [Hugging Face](https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct/tree/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b) |
+
+Set the local checkpoint paths in [`configs/mme_realworld_rs.yaml`](configs/mme_realworld_rs.yaml):
+
+| Model | Configuration key |
+| :--- | :--- |
+| CLIP | `scoring_encoders.checkpoints.CLIP` |
+| GeoRSCLIP | `scoring_encoders.checkpoints.GeoRSCLIP` |
+| RemoteCLIP | `scoring_encoders.checkpoints.RemoteCLIP` |
+| SkyCLIP-50 | `scoring_encoders.checkpoints.SkyCLIP-50` |
+| Qwen3-VL | `answer_model.checkpoint` |
+
+For SkyCLIP-50, extract the downloaded archive and use `epoch_20.pt`. For Qwen3-VL, download the complete model snapshot, including the processor and tokenizer files.
+
+See the [reproduction guide](docs/reproduction.md) for checkpoint specifications and SHA-256 checksums.
 
 ## Dataset Preparation
 
-Obtain the official MME-RealWorld annotations and remote sensing source images independently. Set `dataset.annotations` to the annotation JSON file and `dataset.root` to the directory containing its relative `Image` paths. For example:
+Download [MME-RealWorld](https://huggingface.co/datasets/yifanzhang114/MME-RealWorld) from the official Hugging Face repository. We use the Remote Sensing subset (MME-RealWorld-RS), which contains 3,738 multiple-choice questions covering Color, Count, and Position.
+
+Download `MME_RealWorld.json` and all `remote_sensing.tar.gz.part_*` archives. Merge and extract the image archives following the [official instructions](https://github.com/MME-Benchmarks/MME-RealWorld).
+
+Organize the dataset as follows, preserving the original relative image paths:
 
 ```text
-MME-RealWorld-RS/
-  remote_sensing/
-    ... source images ...
+data/
+└── MME-RealWorld-RS/
+    ├── MME_RealWorld.json
+    └── remote_sensing/
+        └── ...
 ```
 
-The loader selects `Subtask = Remote Sensing` and validates 3,738 questions: Color (1,255), Count (1,226), and Position (1,257). Original question IDs, text, five option strings, labels, and annotation order are preserved. Dataset files and model weights are not distributed here.
+Update the dataset paths in [`configs/mme_realworld_rs.yaml`](configs/mme_realworld_rs.yaml):
 
-## Inference
-
-Fill the external paths in [configs/mme_realworld_rs.yaml](configs/mme_realworld_rs.yaml), then run from the repository root:
-
-```bash
-python scripts/eval_mme_realworld_rs.py \
-  --config configs/mme_realworld_rs.yaml \
-  --data-root /path/to/MME-RealWorld-RS \
-  --output-dir outputs/mme_realworld_rs
+```yaml
+dataset:
+  annotations: data/MME-RealWorld-RS/MME_RealWorld.json
+  root: data/MME-RealWorld-RS
 ```
 
-`--annotations` can override the annotation path. Checkpoints are configured in YAML. The output directory must not already exist; the command does not overwrite or resume a previous run.
-
-Four-encoder region scoring runs before Qwen answering. This offline scoring has its own computation and memory cost. Answering-stage latency excludes that scoring stage; total pipeline cost includes both stages.
+The evaluation script automatically selects the Remote Sensing subset from the original annotations.
 
 ## Evaluation
 
-The prompt requests a concise, image-grounded `Evidence:` description followed by `Final answer:` with one MME option letter. The evaluator prioritizes this explicitly tagged answer. Letter-only, answer-tag, and supported JSON responses are also recognized. Arbitrary option letters inside explanations are not searched, and incomplete or malformed tagged answers are invalid.
+### MME-RealWorld-RS
 
-Overall and category accuracies use every question in the canonical population. Invalid responses and execution failures count as incorrect. The command writes:
+After preparing the model checkpoints and dataset, configure the corresponding paths in [`configs/mme_realworld_rs.yaml`](configs/mme_realworld_rs.yaml).
 
-| File | Contents |
-| --- | --- |
-| `predictions.jsonl` | Question identity, raw response, extracted answer, ground truth, validity, correctness, and errors |
-| `traces.jsonl` | Query descriptions, rankings, selected regions, canvas geometry, protected cells, token budgets, and generation lengths |
-| `results.json` | Overall and category correct/total counts, accuracy, invalid responses, and execution failures |
-| `run_manifest.json` | Effective configuration, checkpoint identities, annotation hash, library versions, and decoding settings |
+Run the following command from the repository root:
 
-## Reproducibility
+FocusEarth performs query-adaptive region prioritization, multi-query region selection, and spatially aligned visual representation construction before answer generation.
 
-The configuration checks the method's numerical settings. Qwen uses bfloat16, SDPA attention, greedy decoding, and at most 64 generated tokens. Region ranking, geometric rounding, group allocation, and output ordering are deterministic.
+The answer model generates an image-grounded evidence description followed by a final option letter:
 
-Lightweight fixtures check geometry, fusion, selection, query processing, answer extraction, configuration, and model interfaces. See the [reproduction guide](docs/reproduction.md) for runtime requirements and the scope of these checks.
+```text
+Evidence: [A concise, image-grounded observation-based explanation]
+Final answer: [A single MME option letter]
+```
+
+Evaluation reports overall and per-category accuracy for Color, Count, and Position. Invalid predictions and execution failures are counted as incorrect.
+
+### Outputs
+
+The evaluation script saves the following files to the specified output directory:
+
+| File | Description |
+| :--- | :--- |
+| `predictions.jsonl` | Model responses and answer predictions |
+| `traces.jsonl` | Region rankings, selected regions, and visual-token statistics |
+| `results.json` | Overall and per-category evaluation results |
+| `run_manifest.json` | Runtime configuration and model specifications |
+
+For detailed evaluation settings and runtime requirements, see the [reproduction guide](docs/reproduction.md).
+
+## Documentation
+
+- [Implementation Guide](docs/implementation.md): Detailed implementation of the FocusEarth framework.
+- [Reproduction Guide](docs/reproduction.md): Model checkpoints, runtime environment, and evaluation settings.
+
+Run the unit tests with:
+
+```bash
+python -m unittest discover -s tests -v
+```
 
 ## Citation
 
-This repository accompanies *FocusEarth: Where to Look and What to Preserve for Ultra-High-Resolution Remote Sensing VQA*.
-
 ## Acknowledgements
 
-FocusEarth uses CLIP, GeoRSCLIP/RS5M, RemoteCLIP, SkyCLIP/SkyScript, Qwen3-VL, OpenCLIP, Transformers, spaCy, and MME-RealWorld. The public package provides MME-RealWorld-RS inference and evaluation; external models and datasets remain subject to their respective terms.
+We thank the teams behind [CLIP](https://github.com/openai/CLIP), [GeoRSCLIP](https://github.com/om-ai-lab/RS5M), [RemoteCLIP](https://github.com/ChenDelong1999/RemoteCLIP), [SkyCLIP](https://github.com/wangzhecheng/SkyScript), and [Qwen3-VL](https://github.com/QwenLM/Qwen3-VL) for making their pretrained models accessible.
+
+We also thank the creators of [MME-RealWorld](https://github.com/MME-Benchmarks/MME-RealWorld) and the developers of [OpenCLIP](https://github.com/mlfoundations/open_clip), [Transformers](https://github.com/huggingface/transformers), and [spaCy](https://github.com/explosion/spaCy) for their valuable contributions to the research community.
+
+External models and datasets are subject to their respective licenses and terms.
