@@ -1,4 +1,7 @@
-# FocusEarth: Where to Look and What to Preserve for Ultra-High-Resolution Remote Sensing VQA
+<h1 align="center">
+FocusEarth: Where to Look and What to Preserve<br>
+for Ultra-High-Resolution Remote Sensing VQA
+</h1>
 
 <p align="center">
   Wanghao Sun<sup>1</sup>,
@@ -10,13 +13,11 @@
 </p>
 
 <p align="center">
-  <sup>1</sup>Yunnan Normal University<br>
-  <sup>2</sup>Beijing University of Technology<br>
-  <sup>3</sup>Southwest Jiaotong University
-</p>
-
-<p align="center">
-  <sup>*</sup>Corresponding author
+  <sup>1</sup> Yunnan Normal University &nbsp;
+  <sup>2</sup> Beijing University of Technology &nbsp;
+  <sup>3</sup> Southwest Jiaotong University
+  <br>
+  <sub>* Corresponding author</sub>
 </p>
 
 ## Overview
