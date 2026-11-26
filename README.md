@@ -1,34 +1,39 @@
-# FocusEarth
+# FocusEarth: Where to Look and What to Preserve for Ultra-High-Resolution Remote Sensing VQA
 
-**FocusEarth: Where to Look and What to Preserve for Ultra-High-Resolution Remote Sensing VQA**
+<p align="center">
+  Wanghao Sun<sup>1</sup>,
+  Nanqing Liu<sup>1,*</sup>,
+  Yu Sun<sup>1</sup>,
+  Zhanxuan Hu<sup>1</sup>,
+  Qi Ming<sup>2</sup>,
+  Heng-Chao Li<sup>3</sup>
+</p>
+
+<p align="center">
+  <sup>1</sup>Yunnan Normal University<br>
+  <sup>2</sup>Beijing University of Technology<br>
+  <sup>3</sup>Southwest Jiaotong University
+</p>
+
+<p align="center">
+  <sup>*</sup>Corresponding author
+</p>
 
 ## Overview
 
-Ultra-high-resolution remote sensing images contain fine-grained evidence spread across large scenes. Uniformly reducing image resolution can remove the details needed to answer a question, while encoding every visual token increases the cost of vision-language inference.
+**FocusEarth** is a training-free framework that couples **where to look** in the source image with **what to preserve** in the encoded visual representation for ultra-high-resolution remote sensing visual question answering (UHR RS-VQA).
 
-FocusEarth identifies question-relevant regions and preserves their visual features within a spatially aligned representation of the full scene. This repository provides the complete region-scoring, selection, visual-representation, and answering pipeline, with an inference and evaluation entry point for **MME-RealWorld-RS only**.
+<p align="center">
+  <img src="assets/overview.pdf" width="100%" alt="Overview of FocusEarth">
+</p>
 
-## Method
+FocusEarth consists of three stages:
 
-1. **Query-Adaptive Region Prioritization.** Deterministic query processing produces a Context description and ordered Entity descriptions. Four frozen ViT-B/32 image-text encoders score 36 expanded source regions using a full-region view and four corner views. Entropy matching calibrates their distributions before equal-weight fusion.
-2. **Multi-Query Region Selection.** Context and Entity descriptions propose regions in order. Candidate IDs are deduplicated, and the Context ranking completes a set of six regions with deterministic tie-breaking.
-3. **Spatially Aligned Visual Representation.** **Spatially Aligned Image Construction** resizes the full scene and outlines the selected regions at their original relative positions. **Region-Protected Token Compression** retains selected-region and outline features, aggregates unprotected features into spatially connected groups, and applies the same grouping to Qwen's final and DeepStack visual streams.
+- **Query-Adaptive Region Prioritization:** Derives entity and context descriptions and fuses regional responses from multiple frozen image–text encoders through score standardization and entropy matching.
+- **Multi-Query Region Selection:** Integrates context and entity proposals under a shared region budget.
+- **Spatially Aligned Visual Representation:** Maps selected source regions onto the encoded feature grid of a resized full-scene image, preserving their corresponding features individually while spatially aggregating the remaining features.
 
-The package follows this hierarchy:
-
-```text
-focusearth/
-  query_processing.py       # Context and Entity descriptions
-  region_prioritization/   # Candidates, view scoring, entropy matching
-  region_selection.py      # Multi-Query Region Selection
-  visual_representation/   # Image construction, feature mapping, compression
-  models/                  # Four scoring encoders and Qwen3-VL integration
-  evaluation/              # MME loading, answering prompt, and metrics
-  configuration.py         # External paths and method settings
-  pipeline.py              # End-to-end composition
-```
-
-See [implementation details](docs/implementation.md) for the module-to-method mapping.
+This repository provides the FocusEarth implementation and inference pipeline for MME-RealWorld-RS.
 
 ## Installation
 
