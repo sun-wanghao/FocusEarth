@@ -53,21 +53,28 @@ This repository provides the official implementation of FocusEarth, including in
 
 ## Installation
 
-Use Python 3.12 and a CUDA-capable environment for model inference. The package pins PyTorch 2.8.0, Transformers 4.57.6, OpenCLIP 3.3.0, spaCy 3.8.16, NumPy 2.3.2, Pillow 11.3.0, and PyYAML 6.0.2.
+FocusEarth requires Python 3.12 and a CUDA-capable GPU for model inference. The package uses PyTorch 2.8.0 and Transformers 4.57.6.
 
 ```bash
+# Clone the repository
+git clone https://github.com/sun-wanghao/FocusEarth.git
+cd FocusEarth
+
+# Create a virtual environment
 python3.12 -m venv .venv
-. .venv/bin/activate
+source .venv/bin/activate
+
+# Install dependencies
 python -m pip install --upgrade pip
 python -m pip install .
-python -m pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+
+# Install the spaCy language model
+python -m pip install \
+  https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
 ```
 
-The spaCy language model is required for entity extraction. Accelerate 1.12.0 supplies Qwen's automatic device placement. Run the lightweight checks with:
+For detailed dependency and runtime requirements, see the [reproduction guide](docs/reproduction.md).
 
-```bash
-python -m unittest discover -s tests -v
-```
 
 ## Model Preparation
 
