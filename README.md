@@ -27,7 +27,7 @@ Ultra-high-resolution (UHR) remote sensing visual question answering (RS-VQA) re
 **FocusEarth** is a training-free framework that couples **where to look** in the source image with **what to preserve** in the encoded visual representation. It leverages multiple frozen image–text encoders to localize question-relevant regions and uses their spatial correspondence to guide visual token compression.
 
 <p align="center">
-  <img src="./overview.png" width="100%" alt="Overview of the FocusEarth framework">
+  <img src="assets/overview.png" width="100%" alt="Overview of FocusEarth">
 </p>
 
 <p align="center">
