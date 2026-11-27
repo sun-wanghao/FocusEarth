@@ -6,7 +6,7 @@ Install the package and `en_core_web_sm` 3.8.0 as shown in the [README](../READM
 
 ## Checkpoints
 
-Set the four file paths under `scoring_encoders.checkpoints` in [the MME configuration](../configs/mme_realworld_rs.yaml). Files are verified against these SHA-256 identities:
+The default encoder paths are defined in [the MME configuration](../configs/mme_realworld_rs.yaml) under `scoring_encoders.checkpoints`. Store the checkpoints as shown in the [README](../README.md#models), or override the paths locally. Files are verified against these SHA-256 identities:
 
 | Encoder | SHA-256 |
 | --- | --- |
@@ -15,17 +15,17 @@ Set the four file paths under `scoring_encoders.checkpoints` in [the MME configu
 | RemoteCLIP ViT-B/32 | `60014e395d930a3f2963d1d89c8522bf4ad56775571e4356e866864789af85c4` |
 | SkyCLIP-50 ViT-B/32 | `69ba9fa7089322a83e9164fe515a222bcece2a715888db5749ab5ce4d1602313` |
 
-`answer_model.checkpoint` must identify a complete local `Qwen/Qwen3-VL-8B-Instruct` snapshot at revision `0c351dd01ed87e9c1b53cbc748cba10e6187ff3b`. Keep its processor, tokenizer, model configuration, and weight files together. Checkpoint loading uses pickle-capable PyTorch APIs where required by the file format; use trusted files.
+By default, `answer_model.checkpoint` points to `models/Qwen3-VL-8B-Instruct/`. It must identify a complete local `Qwen/Qwen3-VL-8B-Instruct` snapshot at revision `0c351dd01ed87e9c1b53cbc748cba10e6187ff3b`. Keep its processor, tokenizer, model configuration, and weight files together. Checkpoint loading uses pickle-capable PyTorch APIs where required by the file format; use trusted files.
 
 ## Dataset and configuration
 
-`dataset.annotations` points to the official MME-RealWorld JSON list. `dataset.root` contains the image paths named by each row's `Image` field. Required fields are `Question_id`, `Subtask`, `Category`, `Image`, `Text`, `Answer choices`, and `Ground truth`. Remote sensing categories use lowercase `color`, `count`, and `position`; the five original option strings retain `(A)` through `(E)` labels, including blank option content.
+The default dataset root is `data/MME-RealWorld-RS/`, with annotations at `data/MME-RealWorld-RS/MME_RealWorld.json`. `dataset.annotations` points to the official MME-RealWorld JSON list. `dataset.root` contains the image paths named by each row's `Image` field. Required fields are `Question_id`, `Subtask`, `Category`, `Image`, `Text`, `Answer choices`, and `Ground truth`. Remote sensing categories use lowercase `color`, `count`, and `position`; the five original option strings retain `(A)` through `(E)` labels, including blank option content.
 
 The configuration groups external inputs separately from method settings. Only paths, the scoring device, and scoring image batch size are user settings. Region-prioritization, selection, visual-representation, model, and generation values are checked against the implementation. Paths are resolved relative to the working directory; `~` is expanded. Dataset and output CLI arguments override their YAML paths.
 
 ## Execution and outputs
 
-Run the [README inference command](../README.md#inference) from the repository root. `python scripts/eval_mme_realworld_rs.py --help` lists the configuration, dataset, annotation, and output arguments. Choose a fresh output directory.
+Run the [README evaluation command](../README.md#evaluation) from the repository root. The default configuration needs no edits when the resources follow the documented layout. `python scripts/eval_mme_realworld_rs.py --help` lists the configuration, dataset, annotation, and output arguments. The default output directory is `outputs/mme_realworld_rs/`; it must not already exist. Use `--output-dir` to select a fresh directory for each subsequent run.
 
 The command scores all questions before loading the answering model. Encoder models are cached across scoring questions and released before Qwen loading. A private intermediate file in the output directory transfers region plans between stages and is removed when answering finishes. No precomputed score bank is required.
 
