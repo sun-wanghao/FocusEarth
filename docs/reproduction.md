@@ -6,7 +6,24 @@ Install the package and `en_core_web_sm` 3.8.0 as shown in the [README](../READM
 
 ## Checkpoints
 
-The default encoder paths are defined in [the MME configuration](../configs/mme_realworld_rs.yaml) under `scoring_encoders.checkpoints`. Store the checkpoints as shown in the [README](../README.md#models), or override the paths locally. Files are verified against these SHA-256 identities:
+From the repository root, run `python scripts/download_models.py` after installing the Python dependencies. It downloads from the original model sources, verifies the four encoder SHA-256 hashes, and retrieves the complete Qwen snapshot at the pinned revision using `huggingface_hub` (installed by Transformers). No GPU is required. Qwen file sizes and Git/LFS content identities are checked against the metadata for that revision. The downloader is separate from evaluation; evaluation does not download models automatically.
+
+The default local paths are:
+
+```text
+models/
+├── CLIP/ViT-B-32.pt
+├── GeoRSCLIP/RS5M_ViT-B-32.pt
+├── RemoteCLIP/RemoteCLIP-ViT-B-32.pt
+├── SkyCLIP-50/epoch_20.pt
+└── Qwen3-VL-8B-Instruct/
+```
+
+To prepare a single model, pass `--only CLIP`, `--only GeoRSCLIP`, `--only RemoteCLIP`, `--only SkyCLIP-50`, or `--only Qwen`. Pass `--config PATH` for a custom configuration. Run `python scripts/download_models.py --check-only` to verify local checkpoints without downloading weights (Qwen verification requires online metadata). Alternatively, obtain the files manually from the links in the [README](../README.md#models) and use the same directory layout.
+
+Rerunning reuses verified checkpoints. HTTP partial files are resumed if the server supports byte ranges; otherwise they restart. Hugging Face manages partial Qwen downloads in its local cache. The SkyCLIP archive is retained for reuse and only its unique `epoch_20.pt` member is extracted. If a file fails verification, move the named incorrect file aside and rerun; the script does not replace an existing invalid checkpoint automatically. Use a dedicated Qwen directory containing only the pinned snapshot files and the Hugging Face cache. Do not run concurrent preparation processes targeting the same paths. The Qwen snapshot alone is approximately 17.5 GB; allow additional space for encoder weights, the SkyCLIP archive, temporary downloads and cache overhead. Free space is checked before transfers and extraction where sizes are available.
+
+The default encoder paths are defined in [the MME configuration](../configs/mme_realworld_rs.yaml) under `scoring_encoders.checkpoints`. Files are verified against these SHA-256 identities:
 
 | Encoder | SHA-256 |
 | --- | --- |
@@ -15,7 +32,7 @@ The default encoder paths are defined in [the MME configuration](../configs/mme_
 | RemoteCLIP ViT-B/32 | `60014e395d930a3f2963d1d89c8522bf4ad56775571e4356e866864789af85c4` |
 | SkyCLIP-50 ViT-B/32 | `69ba9fa7089322a83e9164fe515a222bcece2a715888db5749ab5ce4d1602313` |
 
-By default, `answer_model.checkpoint` points to `models/Qwen3-VL-8B-Instruct/`. It must identify a complete local `Qwen/Qwen3-VL-8B-Instruct` snapshot at revision `0c351dd01ed87e9c1b53cbc748cba10e6187ff3b`. Keep its processor, tokenizer, model configuration, and weight files together. Checkpoint loading uses pickle-capable PyTorch APIs where required by the file format; use trusted files.
+By default, `answer_model.checkpoint` points to `models/Qwen3-VL-8B-Instruct/`. It must identify a complete local `Qwen/Qwen3-VL-8B-Instruct` snapshot at revision `0c351dd01ed87e9c1b53cbc748cba10e6187ff3b`. Keep its processor, tokenizer, model configuration, and weight files together. The model preparation script verifies the pinned snapshot against upstream metadata; the existing inference loader itself does not independently verify the Qwen file hashes. Checkpoint loading uses pickle-capable PyTorch APIs where required by the file format; use trusted files.
 
 ## Dataset and configuration
 
