@@ -1,16 +1,16 @@
-# Supply the null paths below. Paths are relative to the working directory.
+# Run from the repository root. Default paths can be overridden locally.
 dataset:
   name: MME-RealWorld-RS
-  root: null
-  annotations: null
+  root: data/MME-RealWorld-RS
+  annotations: data/MME-RealWorld-RS/MME_RealWorld.json
   question_count: 3738
 
 scoring_encoders:
   checkpoints:
-    CLIP: null
-    GeoRSCLIP: null
-    RemoteCLIP: null
-    SkyCLIP-50: null
+    CLIP: models/CLIP/ViT-B-32.pt
+    GeoRSCLIP: models/GeoRSCLIP/RS5M_ViT-B-32.pt
+    RemoteCLIP: models/RemoteCLIP/RemoteCLIP-ViT-B-32.pt
+    SkyCLIP-50: models/SkyCLIP-50/epoch_20.pt
   device: cuda
   image_batch_size: 128
 
@@ -32,7 +32,7 @@ visual_representation:
   rho: 0.605
 
 answer_model:
-  checkpoint: null
+  checkpoint: models/Qwen3-VL-8B-Instruct
   repository: Qwen/Qwen3-VL-8B-Instruct
   revision: 0c351dd01ed87e9c1b53cbc748cba10e6187ff3b
   prompt_protocol: mme_supplement_evidence_final_answer
@@ -46,4 +46,4 @@ generation:
   max_new_tokens: 64
 
 output:
-  directory: null
+  directory: outputs/mme_realworld_rs
