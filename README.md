@@ -63,7 +63,11 @@ python -m pip install \
 
 ## Models
 
-Download the pretrained checkpoints for the Qwen3-VL-8B-Instruct configuration:
+Download and verify the pretrained checkpoints from the repository root:
+
+```bash
+python scripts/download_models.py
+```
 
 | Model | Checkpoint | Role |
 | :--- | :--- | :--- |
@@ -73,18 +77,7 @@ Download the pretrained checkpoints for the Qwen3-VL-8B-Instruct configuration:
 | SkyCLIP-50 | [ViT-B/32, Top 50%, Epoch 20](https://opendatasharing.s3.us-west-2.amazonaws.com/SkyScript/ckpt/SkyCLIP_ViT_B32_top50pct.zip) | Region scoring |
 | Qwen3-VL | [Qwen3-VL-8B-Instruct](https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct/tree/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b) | Answer model |
 
-Place the checkpoints in the following layout (rename the encoder files as shown if necessary). Use the epoch-20 checkpoint for SkyCLIP-50 and the complete Qwen3-VL snapshot at the linked revision.
-
-```text
-models/
-├── CLIP/ViT-B-32.pt
-├── GeoRSCLIP/RS5M_ViT-B-32.pt
-├── RemoteCLIP/RemoteCLIP-ViT-B-32.pt
-├── SkyCLIP-50/epoch_20.pt
-└── Qwen3-VL-8B-Instruct/
-```
-
-See the [reproduction guide](docs/reproduction.md) for checkpoint specifications and environment requirements.
+The script uses the default model paths under `models/`. See the [reproduction guide](docs/reproduction.md#checkpoints) for manual setup and verification.
 
 ## Evaluation
 
@@ -102,7 +95,7 @@ data/
         └── ...
 ```
 
-Preserve the original image paths in the annotations. With the directory layouts above, the [default configuration](configs/mme_realworld_rs.yaml) requires no edits.
+Preserve the original image paths in the annotations. With the model download command and dataset layout above, the [default configuration](configs/mme_realworld_rs.yaml) requires no edits.
 
 ### Example Usage
 
