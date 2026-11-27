@@ -73,7 +73,16 @@ Download the pretrained checkpoints for the Qwen3-VL-8B-Instruct configuration:
 | SkyCLIP-50 | [ViT-B/32, Top 50%, Epoch 20](https://opendatasharing.s3.us-west-2.amazonaws.com/SkyScript/ckpt/SkyCLIP_ViT_B32_top50pct.zip) | Region scoring |
 | Qwen3-VL | [Qwen3-VL-8B-Instruct](https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct/tree/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b) | Answer model |
 
-Use the epoch-20 checkpoint for SkyCLIP-50 and the complete model snapshot for Qwen3-VL. Set the local checkpoint paths in [`configs/mme_realworld_rs.yaml`](configs/mme_realworld_rs.yaml).
+Place the checkpoints in the following layout (rename the encoder files as shown if necessary). Use the epoch-20 checkpoint for SkyCLIP-50 and the complete Qwen3-VL snapshot at the linked revision.
+
+```text
+models/
+├── CLIP/ViT-B-32.pt
+├── GeoRSCLIP/RS5M_ViT-B-32.pt
+├── RemoteCLIP/RemoteCLIP-ViT-B-32.pt
+├── SkyCLIP-50/epoch_20.pt
+└── Qwen3-VL-8B-Instruct/
+```
 
 See the [reproduction guide](docs/reproduction.md) for checkpoint specifications and environment requirements.
 
@@ -93,22 +102,17 @@ data/
         └── ...
 ```
 
-Configure the dataset paths in [`configs/mme_realworld_rs.yaml`](configs/mme_realworld_rs.yaml):
-
-```yaml
-dataset:
-  annotations: /path/to/MME-RealWorld-RS/MME_RealWorld.json
-  root: /path/to/MME-RealWorld-RS
-```
+Preserve the original image paths in the annotations. With the directory layouts above, the [default configuration](configs/mme_realworld_rs.yaml) requires no edits.
 
 ### Example Usage
 
+Run from the repository root:
+
 ```bash
-python scripts/eval_mme_realworld_rs.py \
-  --config configs/mme_realworld_rs.yaml
+python scripts/eval_mme_realworld_rs.py
 ```
 
-Outputs include `predictions.jsonl`, `traces.jsonl`, `results.json`, and `run_manifest.json`.
+Results are saved to `outputs/mme_realworld_rs/` (`predictions.jsonl`, `traces.jsonl`, `results.json`, and `run_manifest.json`). For another run, use a new output directory, e.g. `--output-dir outputs/mme_realworld_rs_run2`.
 
 For further details, see the [implementation guide](docs/implementation.md) and [reproduction guide](docs/reproduction.md).
 
